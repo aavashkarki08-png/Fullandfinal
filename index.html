@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dear Vena – Romantic Surprise 💌</title>
+<style>
+/* ===== General ===== */
+body{
+margin:0;
+font-family:Arial, sans-serif;
+overflow:hidden;
+color:white;
+}
+.screen{
+position:absolute;
+width:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+justify-content:center;
+align-items:center;
+text-align:center;
+}
+button{
+padding:12px 20px;
+margin:10px;
+border:none;
+border-radius:25px;
+font-size:16px;
+cursor:pointer;
+transition:0.2s;
+background:linear-gradient(90deg,#ff5f6d,#ffc371);
+color:black;
+}
+button:hover{transform:scale(1.1);}
+.hidden{display:none;}
+/* ===== Background ===== */
+#background{
+position:fixed;
+top:0;left:0;width:100%;height:100%;
+background: linear-gradient(135deg, #0b0013, #330033, #ff3366);
+overflow:hidden;
+z-index:-1;
+}
+.heartBg{
+position:absolute;
+font-size:20px;
+opacity:0.5;
+animation:floatUp 6s linear infinite;
+}
+@keyframes floatUp{
+0%{transform:translateY(100vh);}
+100%{transform:translateY(-10vh);}
+}
+/* ===== Notification ===== */
+#notify{
+background:rgba(0,0,0,0.6);
+border:1px solid #ff4d6d;
+padding:15px;
+border-radius:15px;
+animation:fadeIn 1s;
+}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ===== Loading ===== */
+#loadBarContainer{
+width:70%;height:15px;background:#333;border-radius:10px;margin-top:20px;
+}
+#loadFill{
+height:100%;width:0%;background:linear-gradient(90deg,#ff5f6d,#ffc371);
+border-radius:10px;transition:width 3s linear;
+}
+
+/* ===== Spin Wheel ===== */
+#wheelContainer{
+position:relative;
+width:250px;height:250px;
+border-radius:50%;
+border:5px solid #ff4d6d;
+display:flex;
+align-items:center;justify-content:center;
+background:radial-gradient(circle,#330000,#111);
+}
+#wheel{
+width:100%;
+height:100%;
+border-radius:50%;
+position:absolute;
+top:0; left:0;
+transform:rotate(0deg);
+transition:transform 4s cubic-bezier(0.33,1,0.68,1);
+}
+.segment{
+position:absolute;
+width:50%;height:50%;
+top:50%; left:50%;
+transform-origin:0% 0%;
+display:flex;align-items:center;
+justify-content:flex-start;font-size:18px;font-weight:bold;
+color:white;text-shadow:0 0 3px black;
+}
+#wheelPointer{
+position:absolute;
+top:-15px;left:50%;transform:translateX(-50%);
+font-size:30px;
+}
+
+/* ===== Postcard ===== */
+#postcard{
+position:fixed;
+top:50%;left:50%;
+transform:translate(-50%,-50%) scale(0);
+width:320px;padding:20px;
+border-radius:25px;
+background:linear-gradient(135deg,#ffefba,#ffc3a0);
+color:black;
+text-align:center;
+font-size:18px;
+display:block;
+box-shadow:0 10px 25px rgba(0,0,0,0.3);
+animation:popIn 0.6s forwards;
+z-index:1; /* behind buttons */
+pointer-events:none;
+}
+@keyframes popIn{
+0%{transform:translate(-50%,-50%) scale(0);}
+70%{transform:translate(-50%,-50%) scale(1.2);}
+100%{transform:translate(-50%,-50%) scale(1);}
+}
+.heartFloat{
+position:absolute;font-size:20px;opacity:0.8;
+animation:floatHeart 3s linear forwards;
+}
+@keyframes floatHeart{
+0%{transform:translateY(0) scale(0.5); opacity:0;}
+50%{opacity:1;}
+100%{transform:translateY(-150px) scale(1); opacity:0;}
+}
+
+/* ===== Typewriter message ===== */
+.typewriter-text{
+font-size:18px;color:black;white-space:pre-wrap;
+overflow:hidden;border-right:3px solid black;
+animation:typing 4s steps(40,end), blink 0.7s step-end infinite;
+}
+@keyframes typing{from{width:0;}to{width:100%;}}
+@keyframes blink{50%{border-color:transparent;}}
+
+/* ===== Final screen hearts ===== */
+#finalHearts{
+position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;
+}
+
+/* ===== Confetti ===== */
+.confetti{
+position:absolute;width:10px;height:10px;
+animation:fall 3s linear infinite;
+}
+@keyframes fall{0%{transform:translateY(-10vh) rotate(0);}100%{transform:translateY(100vh) rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<div id="background"></div>
+
+<!-- Notification -->
+<div class="screen" id="screen1">
+<div id="notify">
+📱 New message from your Dear Vena 💌<br><br>
+<button onclick="startVault()">Open</button>
+</div>
+</div>
+
+<!-- Loading -->
+<div class="screen hidden" id="screen2">
+<h2>ACCESSING VENA FUN SYSTEM...</h2>
+<div id="loadBarContainer"><div id="loadFill"></div></div>
+</div>
+
+<!-- Spin the Wheel -->
+<div class="screen hidden" id="screen3">
+<h3>Spin the Wheel 🌟</h3>
+<div id="wheelContainer">
+<div id="wheel"></div>
+<div id="wheelPointer">⬆️</div>
+</div>
+<button onclick="spinWheel()">Spin!</button>
+</div>
+
+<!-- Questions -->
+<div class="screen hidden" id="questionScreen">
+<h3 id="questionText"></h3>
+<div id="optionsContainer"></div>
+</div>
+
+<!-- Countdown -->
+<div class="screen hidden" id="screen5">
+<h2>Almost there… get ready for your surprise!</h2>
+<h1 id="count">3</h1>
+</div>
+
+<!-- Final Screen -->
+<div class="screen hidden" id="screen6">
+<h2>🎉 Surprise Unlocked! 🎉</h2>
+<div id="finalHearts"></div>
+<div id="postcard">
+<h2>💌 Vena thinks you’re amazing 😎💖</h2>
+<div class="typewriter-text" id="finalMessage"></div>
+</div>
+<button onclick="celebrate()">Show Me! 🎁</button>
+<button onclick="celebrate()">Open Now 😏</button>
+<button onclick="celebrate()">Can’t Wait 😂</button>
+<button onclick="alert('Haha you can’t resist 😜')">I’m curious 😜</button>
+<button onclick="alert('Tell me! 💌')">What’s inside? 🤔</button>
+<button onclick="alert('No cheating! 😂')">Give me! 😏</button>
+</div>
+
+<script>
+/* ===== Floating hearts background ===== */
+setInterval(()=>{
+let heart=document.createElement("div");
+heart.className="heartBg";
+heart.innerHTML="💖";
+heart.style.left=Math.random()*window.innerWidth+"px";
+heart.style.fontSize=(15+Math.random()*20)+"px";
+document.getElementById("background").appendChild(heart);
+setTimeout(()=>heart.remove(),6000);
+},800);
+
+/* ===== Vault Loading ===== */
+function startVault(){
+document.getElementById("screen1").classList.add("hidden");
+document.getElementById("screen2").classList.remove("hidden");
+setTimeout(()=>{document.getElementById("loadFill").style.width="100%";},100);
+setTimeout(()=>{
+document.getElementById("screen2").classList.add("hidden");
+document.getElementById("screen3").classList.remove("hidden");
+initWheel();
+},3000);
+}
+
+/* ===== Spin Wheel ===== */
+const wheel=document.getElementById("wheel");
+const wheelSegments=["❤️ Love","😂 Funny","😎 Cool","💌 Surprise","🌟 Lucky","😜 Cheeky"];
+function initWheel(){
+wheel.innerHTML="";
+wheelSegments.forEach((txt,i)=>{
+let seg=document.createElement("div");
+seg.className="segment";
+seg.style.transform=`rotate(${i*60}deg)`;
+seg.innerText=txt;
+seg.style.color=["#ff4d6d","#ff6699","#ff99cc","#ffb3cc","#ff66b3","#ff3366"][i];
+wheel.appendChild(seg);
+});
+}
+function spinWheel(){
+let spins=Math.floor(Math.random()*360)+720; // 2+ spins
+wheel.style.transition="transform 4s cubic-bezier(0.33,1,0.68,1)";
+wheel.style.transform=`rotate(${spins}deg)`;
+setTimeout(()=>{
+let index=Math.floor((spins%360)/60);
+alert(`You spun ${wheelSegments[index]}! 😎`);
+document.getElementById("screen3").classList.add("hidden");
+showQuestion();
+},4100);
+}
+
+/* ===== Questions ===== */
+const questions=[
+{q:"What emoji describes your mood today?", options:["😄 Haha yep!","😎 Cool beans!","😂 Lol, perfect","😜 Cheeky!"]},
+{q:"Pick your favorite snack 🍕🍩🍫🍿", options:["Pizza 🍕 Yum!","Donuts 🍩 Sweet!","Chocolate 🍫 Yes!","Popcorn 🍿 Crunch!"]},
+{q:"Best way to prank Vena?", options:["Water balloon 💦","Fake spider 🕷","Hide snacks 🤫","Dance suddenly 💃"]},
+{q:"Choose your favorite mini love gesture ❤️", options:["Send flowers 🌹","Cute message 💌","Surprise hug 🤗","Random call 📱"]}
+];
+let currentQuestion=0;
+const questionScreen=document.getElementById("questionScreen");
+const questionText=document.getElementById("questionText");
+const optionsContainer=document.getElementById("optionsContainer");
+function showQuestion(){
+questionScreen.classList.remove("hidden");
+currentQuestion=0;
+displayQuestion();
+}
+function displayQuestion(){
+let q=questions[currentQuestion];
+questionText.innerText=q.q;
+optionsContainer.innerHTML="";
+q.options.forEach(opt=>{
+let btn=document.createElement("button");
+btn.innerText=opt;
+btn.onclick=function(){
+alert(opt);
+currentQuestion++;
+if(currentQuestion<questions.length){displayQuestion();}
+else{questionScreen.classList.add("hidden"); startCountdown();}
+}
+optionsContainer.appendChild(btn);
+});
+}
+
+/* ===== Countdown ===== */
+function startCountdown(){
+document.getElementById("screen5").classList.remove("hidden");
+let num=3;
+let counter=setInterval(()=>{
+num--;
+document.getElementById("count").innerText=num;
+if(num==0){
+clearInterval(counter);
+document.getElementById("screen5").classList.add("hidden");
+document.getElementById("screen6").classList.remove("hidden");
+setTimeout(()=>{showFinalScreen();},500);
+}
+},1000);
+}
+
+/* ===== Final Screen ===== */
+function showFinalScreen(){
+const card=document.getElementById("postcard");
+card.style.display="block";
+card.style.animation="popIn 0.6s forwards";
+/* Typewriter */
+let finalMsg="💌 Vena thinks you’re amazing and loves seeing you smile 😘";
+const msgElem=document.getElementById("finalMessage");
+msgElem.innerHTML="";
+let idx=0;
+let typeInterval=setInterval(()=>{
+if(idx<finalMsg.length){msgElem.innerHTML+=finalMsg[idx]; idx++;} else{clearInterval(typeInterval);}
+},60);
+/* Floating hearts */
+for(let i=0;i<50;i++){
+let heart=document.createElement("div");
+heart.className="heartFloat";
+heart.innerHTML="💖";
+heart.style.left=(Math.random()*window.innerWidth)+"px";
+heart.style.top=(Math.random()*window.innerHeight)+"px";
+heart.style.fontSize=(15+Math.random()*15)+"px";
+document.getElementById("finalHearts").appendChild(heart);
+setTimeout(()=>heart.remove(),4000);
+}
+}
+
+/* ===== Confetti on button click ===== */
+function celebrate(){
+for(let i=0;i<100;i++){
+let conf=document.createElement("div");
+conf.className="confetti";
+conf.style.left=Math.random()*window.innerWidth+"px";
+conf.style.background="hsl("+Math.random()*360+",100%,50%)";
+document.body.appendChild(conf);
+}
+showFinalScreen();
+}
+</script>
+
+</body>
+</html>
